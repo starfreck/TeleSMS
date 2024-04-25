@@ -89,35 +89,33 @@ jobs:
       id: get_version
       run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
 
-    - name: Create Release
+    - name: Create Release and Get Upload URL
       id: create_release
-      uses: actions/create-release@v1
+      run: |
+        gh auth login --with-token <<< ${{ secrets.GITHUB_TOKEN }}
+        RELEASE_DATA=$(gh release create ${{ env.VERSION }} --title "Release ${{ env.VERSION }}" --notes "" --draft=false --prerelease=false --json upload_url)
+        echo "RELEASE_DATA=$RELEASE_DATA" >> $GITHUB_ENV
       env:
-        GITHUB_TOKEN: ${{ github.token }}
-      with:
-        tag_name: ${{ env.VERSION  }}
-        release_name: Release ${{ env.VERSION  }}
-        draft: false
-        prerelease: false
-
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
     - name: Upload APK Release Asset
       id: upload-android-release-asset
       uses: actions/upload-release-asset@v1
       env:
-        GITHUB_TOKEN: ${{ github.token }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        upload_url: ${{ env.RELEASE_DATA.upload_url }}
         asset_path: ./app-release.apk
         asset_name: TeleSMS.apk
         asset_content_type: application/vnd.android.package-archive
-
+    
     - name: Upload IPA Release Asset
       id: upload-ios-release-asset
       uses: actions/upload-release-asset@v1
       env:
-        GITHUB_TOKEN: ${{ github.token }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        upload_url: ${{ env.RELEASE_DATA.upload_url }}
         asset_path: ./TeleSMS.ipa
         asset_name: TeleSMS.ipa
-        asset_content_type: application/octet-stream
+        asset_content_type: application/octet-stream    
