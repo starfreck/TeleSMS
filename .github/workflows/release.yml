@@ -72,52 +72,53 @@ jobs:
         name: TeleSMS.ipa
         path: build/ios/iphoneos/FlutterIpaExport.ipa
 
-  release:
-    needs: [build-android, build-ios]
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/download-artifact@v2
-      with:
-        name: TeleSMS.apk
-
-    - uses: actions/download-artifact@v2
-      with:
-        name: TeleSMS.ipa
-    
-    - name: Get the version
-      id: get_version
-      run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-      with:
-        tag_name: ${{ env.VERSION  }}
-        release_name: Release ${{ env.VERSION  }}
-        draft: false
-        prerelease: false
-
-    - name: Upload APK Release Asset
-      id: upload-android-release-asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./app-release.apk
-        asset_name: TeleSMS.apk
-        asset_content_type: application/vnd.android.package-archive
-
-    - name: Upload IPA Release Asset
-      id: upload-ios-release-asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./TeleSMS.ipa
-        asset_name: TeleSMS.ipa
-        asset_content_type: application/octet-stream
+      release:
+        needs: [build-android, build-ios]
+        runs-on: ubuntu-latest
+      
+        steps:
+        - uses: actions/download-artifact@v2
+          with:
+            name: TeleSMS.apk
+      
+        - uses: actions/download-artifact@v2
+          with:
+            name: TeleSMS.ipa
+        
+        - name: Get the version
+          id: get_version
+          run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+      
+        - name: Create Release
+          id: create_release
+          uses: softprops/action-gh-release@v1
+          env:
+            GITHUB_TOKEN: ${{ github.token }}
+          with:
+            tag_name: ${{ env.VERSION  }}
+            name: Release ${{ env.VERSION  }}
+            draft: false
+            prerelease: false
+      
+        - name: Upload APK Release Asset
+          id: upload-android-release-asset
+          uses: actions/upload-release-asset@v1
+          env:
+            GITHUB_TOKEN: ${{ github.token }}
+          with:
+            upload_url: ${{ steps.create_release.outputs.upload_url }}
+            asset_path: ./app-release.apk
+            asset_name: TeleSMS.apk
+            asset_content_type: application/vnd.android.package-archive
+      
+        - name: Upload IPA Release Asset
+          id: upload-ios-release-asset
+          uses: actions/upload-release-asset@v1
+          env:
+            GITHUB_TOKEN: ${{ github.token }}
+          with:
+            upload_url: ${{ steps.create_release.outputs.upload_url }}
+            asset_path: ./TeleSMS.ipa
+            asset_name: TeleSMS.ipa
+            asset_content_type: application/octet-stream
+      
