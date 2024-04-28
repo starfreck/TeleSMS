@@ -91,7 +91,9 @@ jobs:
       
         - name: Create Release
           id: create_release
-          run: echo "GITHUB_TOKEN=" >> $GITHUB_ENV
+          run: |
+            echo "GITHUB_TOKEN=" >> $GITHUB_ENV
+            gh auth login
           uses: softprops/action-gh-release@v1
           with:
             tag_name: ${{ env.VERSION  }}
