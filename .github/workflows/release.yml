@@ -91,9 +91,8 @@ jobs:
       
         - name: Create Release
           id: create_release
+          run: echo "GITHUB_TOKEN=" >> $GITHUB_ENV
           uses: softprops/action-gh-release@v1
-          env:
-            GITHUB_TOKEN: ${{ secrets.TOKEN }}
           with:
             tag_name: ${{ env.VERSION  }}
             name: Release ${{ env.VERSION  }}
@@ -103,19 +102,15 @@ jobs:
         - name: Upload APK Release Asset
           id: upload-android-release-asset
           uses: actions/upload-release-asset@v1
-          env:
-            GITHUB_TOKEN: ${{ secrets.TOKEN }}
           with:
             upload_url: ${{ steps.create_release.outputs.upload_url }}
-            asset_path: ./app-release.apk
+            asset_path: ./TeleSMS.apk
             asset_name: TeleSMS.apk
             asset_content_type: application/vnd.android.package-archive
       
         - name: Upload IPA Release Asset
           id: upload-ios-release-asset
           uses: actions/upload-release-asset@v1
-          env:
-            GITHUB_TOKEN: ${{ secrets.TOKEN }}
           with:
             upload_url: ${{ steps.create_release.outputs.upload_url }}
             asset_path: ./TeleSMS.ipa
