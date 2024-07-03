@@ -51,3 +51,6 @@ windows/
 macos/
 # Web Source Code
 web/
+
+# Enviroment Variables
+.env

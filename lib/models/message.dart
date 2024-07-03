@@ -13,7 +13,7 @@ class Message {
 
   @override
   String toString() {
-    return "👤️ ${Uri.encodeComponent(sender)}\n🕝 $time 🇮🇳\n💬 $sms";
+    return "👤️ $sender\n🕝 $time 🇮🇳\n💬 $sms";
   }
 
   factory Message.fromSMS(SMS sms) {

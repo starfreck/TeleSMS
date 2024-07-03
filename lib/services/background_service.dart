@@ -9,15 +9,19 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart'
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:readsms/readsms.dart';
 import 'package:telesms/models/message.dart';
-import 'package:telesms/services/telegram_service.dart';
+import 'package:telesms/services/socket_service.dart';
 
 final backgroundServiceProvider =
     Provider<BackgroundService>((ref) => BackgroundService());
 
 class BackgroundService {
   static final smsReader = Readsms();
+  static final container = ProviderContainer();
+  // get the container and get values from the storage service
+  static final socket = container.read(socketServiceProvider);
 
   Future<void> initializeService() async {
+    log("initializing Background Service...");
     final service = FlutterBackgroundService();
     final channel = _createNotificationChannel();
     final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
@@ -94,9 +98,15 @@ class BackgroundService {
   static void onUserStart(ServiceInstance service) {
     service.on('stopService').listen((event) {
       log("Stopping Service....");
+      // disconnect from the server
+      socket.disconnect();
+      // dispose the container
+      container.dispose();
+      // stop the service
       service.stopSelf();
     });
-
+    // connect to the server
+    socket.connect();
     // Listen to Incoming SMS messages
     smsReader.read();
     smsReader.smsStream.listen(handleNewSms);
@@ -109,7 +119,17 @@ class BackgroundService {
     log('Received new SMS time : ${sms.timeReceived}');
     log('Received new SMS body : ${sms.body}');
 
+    // Send to the server
+    sendToServer(Message.fromSMS(sms));
+
     // Send to Telegram
-    TelegramService.sendOnTelegram(Message.fromSMS(sms));
+    // TelegramService.sendOnTelegram(Message.fromSMS(sms));
+  }
+
+  static void sendToServer(Message message) async {
+    // socket.connect();
+    socket.sendSMS(message.toString());
+    // Disposing the container
+    // container.dispose();
   }
 }
